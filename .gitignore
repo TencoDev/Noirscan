@@ -1,0 +1,9 @@
+/.git
+/__pycache__
+/.venv
+/output
+/reports
+*.pyc
+*.pyo
+*.log
+.DS_Store
