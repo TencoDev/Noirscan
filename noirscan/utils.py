@@ -4,6 +4,13 @@ import re
 from colorama import Fore, Style
 from datetime import datetime
 
+
+def is_onion(url: str):
+    return ".onion" in url
+
+def clean_title(title: str):
+    return re.sub(r'\s+', ' ', title).strip()
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 

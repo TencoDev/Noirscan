@@ -6,14 +6,9 @@ import random
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
+from utils import is_onion, clean_title
 
-def is_onion(url):
-    return ".onion" in url
-
-def clean_title(title):
-    return re.sub(r'\s+', ' ', title).strip()
-
-def get_ip_address(url):
+def get_ip_address(url: str):
     try:
         domain = url.split('/')[2]
         if domain.endswith(".onion"):
@@ -21,9 +16,9 @@ def get_ip_address(url):
         ip_address = socket.gethostbyname(domain)
         return ip_address
     except Exception:
-        return None
+        return "N/A"
     
-def get_geolocation(ip_address):
+def get_geolocation(ip_address: str):
     if not ip_address or ip_address == "N/A":
         return "N/A"
 
@@ -48,7 +43,7 @@ def get_geolocation(ip_address):
         return "N/A"
 
 # Single page scraping
-def scrape(url):
+def scrape(url: str):
     headers = {"User-Agent": random.choice(USER_AGENTS)}
 
     try:
