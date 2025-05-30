@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from utils import is_onion, clean_title
 from network import get_ip_address, get_geolocation
+from urllib.robotparser import RobotFileParser
+from urllib.parse import urlparse, urljoin
 
 class Crawler:
     def __init__(
@@ -21,7 +23,25 @@ class Crawler:
         self.max_depth = max_depth
         self.ignore_robots = ignore_robots
         self.visited = set()
+    
+    # To check if given URL is ethically safe to crawl based on robots.txt
+    def is_allowed_by_robots(self, url: str) -> bool:
+        if self.ignore_robots:
+            return True
 
+        parsed = urlparse(url)
+        robots_txt_url = urljoin(f"{parsed.scheme}://{parsed.netloc}", "/robots.txt")
+        rp = RobotFileParser()
+        try:
+            rp.set_url(robots_txt_url)
+            rp.read()
+            return rp.can_fetch(self.user_agent, url)
+        except Exception as e:
+            # If robots.txt can't be fetched, default to allow
+            print(f"robots.txt check failed for {robots_txt_url}: {e}")
+            return True
+
+    # Handles scraping of one single page
     def scrape(self, url: str):
         headers = {"User-Agent": self.user_agent}
         try:
@@ -47,6 +67,7 @@ class Crawler:
             print(f"Error scraping {url}: {e}")
             return None
 
+    # Handles scraping of multiple pages using recursion
     def crawl(self, url: str, depth: int = 0):
         if depth > self.max_depth or url in self.visited:
             return []

@@ -3,19 +3,24 @@ import os
 import re
 from colorama import Fore, Style
 from datetime import datetime
-    
+
+# Checks if the url is an onion url
 def is_onion(url: str):
     return ".onion" in url
 
+# Removes extra whitespaces from title string
 def clean_title(title: str):
     return re.sub(r'\s+', ' ', title).strip()
 
+# Clears the local CLI
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+# Removes irrelevant characters from filename string
 def sanitize_filename(filename: str):
     return re.sub(r'[^\w\-_\. ]', '_', filename)
 
+# Prints summary of the crawl operation based on pages scraped
 def print_page_results(page_results: list):
     print(Fore.YELLOW + Style.BRIGHT + "Result Summary")
     print("=" * 130)
@@ -39,6 +44,7 @@ def print_page_results(page_results: list):
 
     return True
 
+# Handles --save functionality
 def save_pages(page_results: list):
     if not page_results:
         return False

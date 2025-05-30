@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--depth', '-d', type=int, default=0, help='Depth of crawling (default: 0)')
     parser.add_argument('--tor-port', '-tp', type=int, default=9050, help='Tor SOCKS5 proxy port (default: 9050)')
     parser.add_argument('--user-agent', '-ua', type=str, help='Manually set user agent (default: chosen automatically)')
-    parser.add_argument('--ignore-robots', type=bool, default=True, help='Toggle interaction with robot.txt (default: True (skips website))')
+    parser.add_argument('--ignore-robots', type=bool, default=False, help='Toggle interaction with robot.txt (default: False)')
 
     args = parser.parse_args()
     init(autoreset=True)
