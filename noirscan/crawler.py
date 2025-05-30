@@ -23,6 +23,7 @@ class Crawler:
         self.max_depth = max_depth
         self.ignore_robots = ignore_robots
         self.visited = set()
+        self.robots_cache = {}
     
     # To check if given URL is ethically safe to crawl based on robots.txt
     def is_allowed_by_robots(self, url: str) -> bool:
@@ -30,19 +31,28 @@ class Crawler:
             return True
 
         parsed = urlparse(url)
-        robots_txt_url = urljoin(f"{parsed.scheme}://{parsed.netloc}", "/robots.txt")
-        rp = RobotFileParser()
-        try:
-            rp.set_url(robots_txt_url)
-            rp.read()
-            return rp.can_fetch(self.user_agent, url)
-        except Exception as e:
-            # If robots.txt can't be fetched, default to allow
-            print(f"robots.txt check failed for {robots_txt_url}: {e}")
-            return True
+        domain = parsed.netloc
+        robots_url = urljoin(f"{parsed.scheme}://{domain}", "/robots.txt")
+        if domain in self.robots_cache:
+            rp = self.robots_cache[domain]
+        else:
+            rp = RobotFileParser()
+            rp.set_url(robots_url)
+            try:
+                rp.read()
+            except Exception as e:
+                print(f"robots.txt fetch failed for {robots_url}: {e}")
+                self.robots_cache[domain] = rp  # Cache anyway (default allows all)
+                return True
+            self.robots_cache[domain] = rp
+        return rp.can_fetch(self.user_agent, url)
 
     # Handles scraping of one single page
     def scrape(self, url: str):
+        if not self.is_allowed_by_robots(url):
+            print(f"Blocked by robots.txt: {url}")
+            return None
+        
         headers = {"User-Agent": self.user_agent}
         try:
             response = requests.get(
