@@ -8,7 +8,7 @@ from utils import *
 from network import *
 
 # Single page scraping
-def scrape(url: str, tor_proxies: list[str]):
+def scrape(url: str, tor_proxies: dict):
     headers = {"User-Agent": random.choice(USER_AGENTS)}
 
     try:

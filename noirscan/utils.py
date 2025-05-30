@@ -13,10 +13,10 @@ def clean_title(title: str):
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def sanitize_filename(filename):
+def sanitize_filename(filename: str):
     return re.sub(r'[^\w\-_\. ]', '_', filename)
 
-def print_page_results(page_results):
+def print_page_results(page_results: list):
     print(Fore.YELLOW + Style.BRIGHT + "Result Summary")
     print("=" * 130)
 
@@ -39,7 +39,7 @@ def print_page_results(page_results):
 
     return True
 
-def save_pages(page_results):
+def save_pages(page_results: list):
     if not page_results:
         return False
 

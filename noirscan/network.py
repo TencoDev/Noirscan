@@ -23,7 +23,7 @@ def get_ip_address(url: str):
         if domain.endswith(".onion"):
             return "N/A"
         ip_address = socket.gethostbyname(domain)
-        return ip_address
+        return str(ip_address)
     except Exception:
         return "N/A"
  

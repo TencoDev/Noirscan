@@ -3,15 +3,15 @@ import json
 
 
 class ScrapedPage:
-    def __init__(self, url, title, text, status_code, links, ip_address, geolocation):
+    def __init__(self, url:str, title:str, text:str, status_code:int, links:list, ip_address:str, geolocation:str):
         self.__url = url
         self.__title = title
         self.__text = text
         self.__status_code = status_code
         self.__links = links
         self.__timestamp = datetime.now()
-        self.__ip_address = ip_address or "Not Found"
-        self.__geolocation = geolocation or "Not Found"
+        self.__ip_address = ip_address or "N/A"
+        self.__geolocation = geolocation or "N/A"
     
     def get_url(self):
         return self.__url
