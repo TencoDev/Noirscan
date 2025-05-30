@@ -1,11 +1,10 @@
 # main.py - modified version
 import argparse
-import time
 from datetime import datetime
 from colorama import Fore, Style, init
-from models import ScrapedPage
 from crawler import crawl
 from utils import *
+from network import *
 
 def main():
     

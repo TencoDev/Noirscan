@@ -3,22 +3,6 @@ import os
 import re
 from colorama import Fore, Style
 from datetime import datetime
-import socket
-
-# Sets SOCKS5H port path
-def get_tor_proxies(port: str):
-    return {
-        'http': f'socks5h://127.0.0.1:{port}',
-        'https': f'socks5h://127.0.0.1:{port}',
-    }
-    
-# Checks if TOR is running, defaults to port 9050
-def is_tor_running(host='127.0.0.1', port=9050, timeout=2):
-    try:
-        with socket.create_connection((host, port), timeout=timeout):
-            return True
-    except OSError:
-        return False
     
 def is_onion(url: str):
     return ".onion" in url

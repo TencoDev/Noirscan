@@ -1,46 +1,11 @@
 from config import USER_AGENTS, DEFAULT_TIMEOUT
 from models import ScrapedPage
 import requests
-import socket
 import random
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-import re
 from utils import *
-
-def get_ip_address(url: str):
-    try:
-        domain = url.split('/')[2]
-        if domain.endswith(".onion"):
-            return "N/A"
-        ip_address = socket.gethostbyname(domain)
-        return ip_address
-    except Exception:
-        return "N/A"
-    
-def get_geolocation(ip_address: str):
-    if not ip_address or ip_address == "N/A":
-        return "N/A"
-
-    try:
-        url = f"https://ipinfo.io/{ip_address}/json"
-        response = requests.get(url)
-
-        if response.status_code != 200:
-            return "N/A"
-
-        data = response.json()
-        location = {
-            'ip': data.get('ip', 'Not Found'),
-            'city': data.get('city', 'Not Found'),
-            'region': data.get('region', 'Not Found'),
-            'country': data.get('country', 'Not Found'),
-            'location': data.get('loc', 'Not Found') 
-        }
-
-        return location
-    except requests.exceptions.RequestException:
-        return "N/A"
+from network import *
 
 # Single page scraping
 def scrape(url: str, tor_proxies: list[str]):
@@ -71,7 +36,7 @@ def scrape(url: str, tor_proxies: list[str]):
         return page
 
     except requests.RequestException as e:
-        return None
+        print(e)
 
 visited = set()
 
