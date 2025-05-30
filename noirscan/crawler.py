@@ -1,4 +1,4 @@
-from config import TOR_PROXIES, USER_AGENTS, DEFAULT_TIMEOUT
+from config import USER_AGENTS, DEFAULT_TIMEOUT
 from models import ScrapedPage
 import requests
 import socket
@@ -6,7 +6,7 @@ import random
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import re
-from utils import is_onion, clean_title
+from utils import *
 
 def get_ip_address(url: str):
     try:
@@ -43,11 +43,11 @@ def get_geolocation(ip_address: str):
         return "N/A"
 
 # Single page scraping
-def scrape(url: str):
+def scrape(url: str, tor_proxies: list[str]):
     headers = {"User-Agent": random.choice(USER_AGENTS)}
 
     try:
-        response = requests.get(url, proxies=TOR_PROXIES, headers=headers, timeout=DEFAULT_TIMEOUT)
+        response = requests.get(url, proxies=tor_proxies, headers=headers, timeout=DEFAULT_TIMEOUT)
         status_code = response.status_code
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -75,14 +75,14 @@ def scrape(url: str):
 
 visited = set()
 
-def crawl(url, depth=0, max_depth=0):
+def crawl(url, tor_proxies, depth=0, max_depth=0):
     if depth > max_depth or url in visited:
         return []
 
     visited.add(url)
     result = []
 
-    page = scrape(url)
+    page = scrape(url, tor_proxies)
     if page:
         result.append(page)
 

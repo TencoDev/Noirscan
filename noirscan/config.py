@@ -1,10 +1,5 @@
 # config.py
 
-TOR_PROXIES = {
-    'http': 'socks5h://127.0.0.1:9050',
-    'https': 'socks5h://127.0.0.1:9050',
-}
-
 DEFAULT_TIMEOUT = 20
 
 USER_AGENTS = [

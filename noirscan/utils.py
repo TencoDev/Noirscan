@@ -3,8 +3,23 @@ import os
 import re
 from colorama import Fore, Style
 from datetime import datetime
+import socket
 
-
+# Sets SOCKS5H port path
+def get_tor_proxies(port: str):
+    return {
+        'http': f'socks5h://127.0.0.1:{port}',
+        'https': f'socks5h://127.0.0.1:{port}',
+    }
+    
+# Checks if TOR is running, defaults to port 9050
+def is_tor_running(host='127.0.0.1', port=9050, timeout=2):
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+    
 def is_onion(url: str):
     return ".onion" in url
 
@@ -16,11 +31,6 @@ def clear_screen():
 
 def sanitize_filename(filename):
     return re.sub(r'[^\w\-_\. ]', '_', filename)
-
-def print_crawl_start(url, timestamp):
-    print(Fore.YELLOW + Style.BRIGHT + "Dark web crawler has booted up")
-    print(f"Crawling started at: {timestamp}")
-    print("Crawling given URL... 🌀")
 
 def print_page_results(page_results):
     print(Fore.YELLOW + Style.BRIGHT + "Result Summary")
