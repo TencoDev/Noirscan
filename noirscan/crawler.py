@@ -4,56 +4,61 @@ import requests
 import random
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from utils import *
-from network import *
+from utils import is_onion, clean_title
+from network import get_ip_address, get_geolocation
 
-# Single page scraping
-def scrape(url: str, tor_proxies: dict):
-    headers = {"User-Agent": random.choice(USER_AGENTS)}
+class Crawler:
+    def __init__(
+        self,
+        tor_proxies: dict,
+        user_agent: str = None,
+        max_depth: int = 0,
+        ignore_robots: bool = False
+        ):
+        
+        self.tor_proxies = tor_proxies
+        self.user_agent = user_agent or random.choice(USER_AGENTS)
+        self.max_depth = max_depth
+        self.ignore_robots = ignore_robots
+        self.visited = set()
 
-    try:
-        response = requests.get(url, proxies=tor_proxies, headers=headers, timeout=DEFAULT_TIMEOUT)
-        status_code = response.status_code
-        soup = BeautifulSoup(response.text, "html.parser")
+    def scrape(self, url: str):
+        headers = {"User-Agent": self.user_agent}
+        try:
+            response = requests.get(
+                url, proxies=self.tor_proxies, headers=headers, timeout=DEFAULT_TIMEOUT
+            )
+            status_code = response.status_code
+            soup = BeautifulSoup(response.text, "html.parser")
 
-        raw_title = soup.title.string if soup.title else "NONE"
-        title = clean_title(raw_title)
+            raw_title = soup.title.string if soup.title else "NONE"
+            title = clean_title(raw_title)
+            html = str(soup.body) if soup.body else str(soup)
+            links = [urljoin(url, tag['href']) for tag in soup.find_all("a", href=True)]
+            ip_address = "N/A"
+            geolocation = "N/A"
+            if not is_onion(url):
+                ip_address = get_ip_address(url)
+                geolocation = get_geolocation(ip_address)
 
-        # Save HTML content (cleaned but retains structure)
-        html = str(soup.body) if soup.body else str(soup)
+            return ScrapedPage(url, title, html, status_code, links, ip_address, geolocation)
 
-        # Resolve all links (absolute or relative)
-        links = [urljoin(url, tag['href']) for tag in soup.find_all("a", href=True)]
+        except requests.RequestException as e:
+            print(f"Error scraping {url}: {e}")
+            return None
 
-        ip_address = "N/A"
-        geolocation = "N/A"
+    def crawl(self, url: str, depth: int = 0):
+        if depth > self.max_depth or url in self.visited:
+            return []
 
-        if not is_onion(url):
-            ip_address = get_ip_address(url)
-            geolocation = get_geolocation(ip_address)
+        self.visited.add(url)
+        result = []
 
-        page = ScrapedPage(url, title, html, status_code, links, ip_address, geolocation)
-        return page
-
-    except requests.RequestException as e:
-        print(e)
-
-visited = set()
-
-def crawl(url, tor_proxies, depth=0, max_depth=0):
-    if depth > max_depth or url in visited:
-        return []
-
-    visited.add(url)
-    result = []
-
-    page = scrape(url, tor_proxies)
-    if page:
-        result.append(page)
-
-        if depth < max_depth:
-            for link in page.get_links():
-                if link.startswith("http") or link.startswith("https"):
-                    result.extend(crawl(link, depth + 1, max_depth))
-
-    return result
+        page = self.scrape(url)
+        if page:
+            result.append(page)
+            if depth < self.max_depth:
+                for link in page.get_links():
+                    if link.startswith("http"):
+                        result.extend(self.crawl(link, depth + 1))
+        return result

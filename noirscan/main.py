@@ -2,7 +2,7 @@
 import argparse
 from datetime import datetime
 from colorama import Fore, Style, init
-from crawler import crawl
+from crawler import Crawler
 from utils import *
 from network import *
 
@@ -20,6 +20,8 @@ def main():
     parser.add_argument('--save', '-s', action='store_true', help='Save output to .json file')
     parser.add_argument('--depth', '-d', type=int, default=0, help='Depth of crawling (default: 0)')
     parser.add_argument('--tor-port', '-tp', type=int, default=9050, help='Tor SOCKS5 proxy port (default: 9050)')
+    parser.add_argument('--user-agent', '-ua', type=str, help='Manually set user agent (default: chosen automatically)')
+    parser.add_argument('--ignore-robots', type=bool, default=True, help='Toggle interaction with robot.txt (default: True (skips website))')
 
     args = parser.parse_args()
     init(autoreset=True)
@@ -29,6 +31,8 @@ def main():
     max_depth = args.depth
     save_files = args.save
     tor_port = args.tor_port
+    user_agent = args.user_agent
+    ignore_robots = args.ignore_robots
 
     # Check if TOR is running
     if not is_tor_running(port=tor_port):
@@ -38,7 +42,14 @@ def main():
     tor_proxies = get_tor_proxies(tor_port)
     
     # Start crawling and store it as list[ScrapedPage]
-    page_results = crawl(url, tor_proxies, depth=0, max_depth=max_depth)
+    crawler = Crawler(
+    tor_proxies=tor_proxies,
+    user_agent=user_agent,
+    max_depth=max_depth,
+    ignore_robots=ignore_robots,
+    )
+    page_results = crawler.crawl(url)
+    
     results_displayed = print_page_results(page_results)
     
     files_saved = False
